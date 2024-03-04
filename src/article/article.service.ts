@@ -7,6 +7,7 @@ import {InjectRepository} from "@nestjs/typeorm";
 import {Cache} from 'cache-manager';
 import {CACHE_MANAGER} from "@nestjs/cache-manager";
 import * as util from "util";
+import * as moment from "moment";
 
 @Injectable()
 export class ArticleService {
@@ -53,25 +54,33 @@ export class ArticleService {
         }
     }
 
-    async findCachedByPubDateAndAuthor(authorId?: string,
-                                       pubDate?: string,
-                                       page: number = 1,
-                                       limit: number = 10,) {
+    async findCachedByPubDateAndAuthor(
+        authorId?: string,
+        publishedSince?: string,
+        publishUntil?: string,
+        page: number = 1,
+        limit: number = 10,
+    ) {
         const articlesQuery = this.articleRepository.createQueryBuilder("article")
             .leftJoinAndSelect('article.author', 'author')
             .where('article.visible = :visible', {visible: true})
         if (authorId) {
             articlesQuery.andWhere('article.author_id = :authorId', {authorId})
         }
-        if (pubDate) {
-            articlesQuery.andWhere('article.published = :pubDate', {pubDate})
+        if (publishedSince && publishUntil) {
+            const publishedSinceDate = moment.unix(Number(publishedSince)).toDate();
+            const publishUntilDate = moment.unix(Number(publishUntil)).toDate();
+            articlesQuery.andWhere('article.published BETWEEN :start AND :end', {
+                start: publishedSinceDate,
+                end: publishUntilDate,
+            });
         }
         let cacheKey = 'all_article';
         if (authorId) {
             cacheKey = util.format('all_article:%s', authorId);
         }
-        if (pubDate) {
-            cacheKey += "_" + util.format('%s', pubDate)
+        if (publishedSince && publishUntil) {
+            cacheKey += "_" + util.format('start:%s_end:%s', publishedSince, publishUntil)
         }
 
         try {
@@ -86,24 +95,24 @@ export class ArticleService {
                 .take(limit)
                 .getManyAndCount();
 
-            const jsonArticles = JSON.stringify(articles)
-            await this.cacheManager.set(cacheKey, jsonArticles);
-
-            if (total === 0) {
-                throw new NotFoundException();
-            }
-            return {
+            let responseWithPagination = {
                 data: articles,
                 total,
                 page,
                 limit,
                 totalPages: Math.ceil(total / limit),
             };
+            const jsonArticles = JSON.stringify(responseWithPagination)
+            await this.cacheManager.set(cacheKey, jsonArticles);
+
+            if (total === 0) {
+                throw new NotFoundException();
+            }
+            return responseWithPagination;
         } catch (e) {
             console.error('Error while retrieving articles from Redis cache:', e);
             throw new NotFoundException('Articles not found');
         }
-
     }
 
     async update(id: string, updateArticleDto: UpdateArticleDto) {
