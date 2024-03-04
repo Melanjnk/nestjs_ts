@@ -49,7 +49,6 @@ export class ArticleService {
                 throw new NotFoundException();
             }
         } catch (e) {
-            console.error(`Error while retrieving article #${id} from Redis cache:`, e);
             throw new NotFoundException(`Article #${id} not found`);
         }
     }

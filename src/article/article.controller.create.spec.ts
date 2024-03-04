@@ -6,6 +6,7 @@ import { CACHE_MANAGER, Cache } from '@nestjs/cache-manager';
 import { CreateArticleDto } from './dto/create-article.dto';
 import {Article} from "./entities/article.entity";
 import {Author} from "../author/entities/author.entity";
+import {UpdateArticleDto} from "./dto/update-article.dto";
 
 describe('ArticleService', () => {
     let service: ArticleService;

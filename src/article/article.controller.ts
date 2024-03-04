@@ -40,7 +40,7 @@ export class ArticleController {
 
   @Get()
   @UseInterceptors(CacheInterceptor)
-  @CacheKey('articles_by_author__'+':authorId'+'_publish__'+':publish')
+  @CacheKey('articles_by_author__'+':authorId'+'_publish__'+':publishedSince')
   @CacheTTL(TTL)
   findByPublishedAndByAuthor(
       @Query('authorId') authorId: string,

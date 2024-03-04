@@ -20,13 +20,13 @@ export class Article {
     description: string
     
     @CreateDateColumn()
-    created: string
+    created: Date
 
     @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
     published: Date;
 
     @UpdateDateColumn()
-    update: string
+    updated: Date
 
     @ManyToOne(() => Author, (author) => author.articles)
     @JoinColumn({name: 'author_id'})
