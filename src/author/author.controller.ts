@@ -24,7 +24,7 @@ export class AuthorController {
   //@todo implement cache
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.authorService.findOne(+id);
+    return this.authorService.findOne(id);
   }
 
   @Patch(':id')

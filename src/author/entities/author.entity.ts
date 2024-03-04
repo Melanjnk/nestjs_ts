@@ -4,7 +4,7 @@ import {Article} from "../../article/entities/article.entity";
 @Entity()
 export class Author {
     @PrimaryGeneratedColumn({name: 'id'})
-    id: number
+    id: string
     
     @Column()
     name: string

@@ -31,9 +31,9 @@ export class AuthorService {
         }
     }
 
-    async findOne(id: number) {
+    async findOne(id: string) {
         try {
-            return await this.authorRepository.findOneOrFail({where: {id}})
+            return await this.authorRepository.findOneOrFail({where: {id: id}})
         } catch (err) {
             throw new NotFoundException();
         }
